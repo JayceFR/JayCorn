@@ -2,6 +2,7 @@ import pygame
 import Assets.Scripts.map as maps
 import Assets.Scripts.framework as engine
 import Assets.Scripts.bg_particles as bg_particles
+import Assets.Scripts.bird as bird
 
 
 pygame.init()
@@ -47,14 +48,21 @@ for x in range(4):
     squrrel_run_animation.append(get_image(squirrel_run_spritesheet, x, 30, 18, 1.5, (63, 72, 204), [25*1.5,24*1.5]))
 
 
-map = maps.Map("./Assets/Maps/map.txt", 32, "./Assets/Tiles", True, True, {"o": [], "p" : []})
+map = maps.Map("./Assets/Maps/map.txt", 32, "./Assets/Tiles", True, True, {"o": [], "p" : [], "b" : []})
 tile_rects, entity_loc = map.get_rect()
 player = engine.Player(50,50, squirrel_idle_animation[0].get_width(), squirrel_idle_animation[1].get_height(), squirrel_idle_animation, squrrel_run_animation)
 true_scroll = [0,0]
 run = True
 
+birdies = []
+if len(entity_loc['b']) != 0:
+    for loc in entity_loc['b']:
+        birdies.append(bird.Bird(loc[0], loc[1], 32, 32))
+
 clock = pygame.time.Clock()
 bg_particle_effect = bg_particles.Master(leaf_imgs)
+
+safe = False
 
 while run:
     clock.tick(60)
@@ -69,14 +77,24 @@ while run:
 
     map.draw(display, scroll)
 
-    #Drawing trees
+    safe = False
+    #Drawing trees and checking if player is safe
     if len(entity_loc['o']) != 0:
         for loc in entity_loc['o']:
+            if player.get_rect().collidepoint(loc[0], loc[1]):
+                safe = True
             display.blit(tree_img2, (loc[0] - scroll[0] - 69, loc[1] - scroll[1] - 110))
     if len(entity_loc['p']) != 0:
         for loc in entity_loc['p']:
+            if player.get_rect().collidepoint(loc[0], loc[1]):
+                safe = True
             display.blit(tree_img, (loc[0] - scroll[0] - 69, loc[1] - scroll[1] - 110))
-
+    
+    #Drawing birds
+    for birdie in birdies:
+        birdie.move(safe, player.get_rect().x, player.get_rect().y)
+        birdie.draw(display, scroll)
+    
     player.move(tile_rects, time)
     player.draw(display, scroll)
 
