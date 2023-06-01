@@ -3,6 +3,7 @@ import Assets.Scripts.map as maps
 import Assets.Scripts.framework as engine
 import Assets.Scripts.bg_particles as bg_particles
 import Assets.Scripts.bird as bird
+import Assets.Scripts.fireflies as fireflies
 
 
 pygame.init()
@@ -39,14 +40,16 @@ tree_img.set_colorkey((0,0,0))
 tree_img2 = pygame.image.load("./Assets/Entities/tree2.png").convert_alpha()
 tree_img2 = pygame.transform.scale(tree_img2, (tree_img2.get_width()*1.5, tree_img2.get_height()*1.5))
 tree_img2.set_colorkey((0,0,0))
+bird_img = pygame.image.load("./Assets/Sprites/bird_fly.png").convert_alpha()
 leaf_imgs = [leaf_img, leaf_img2]
 
 squirrel_idle_animation = []
 squrrel_run_animation = []
+bird_animation = []
 for x in range(4):
     squirrel_idle_animation.append(get_image(squirrel_idle_spritesheet, x, 25, 24, 1.5, (63, 72, 204)))
     squrrel_run_animation.append(get_image(squirrel_run_spritesheet, x, 30, 18, 1.5, (63, 72, 204), [25*1.5,24*1.5]))
-
+    bird_animation.append(get_image(bird_img, x, 22, 14, 2, (69,40,60)))
 
 map = maps.Map("./Assets/Maps/map.txt", 32, "./Assets/Tiles", True, True, {"o": [], "p" : [], "b" : []})
 tile_rects, entity_loc = map.get_rect()
@@ -57,10 +60,11 @@ run = True
 birdies = []
 if len(entity_loc['b']) != 0:
     for loc in entity_loc['b']:
-        birdies.append(bird.Bird(loc[0], loc[1], 32, 32))
+        birdies.append(bird.Bird(loc[0], loc[1], 32, 32, bird_animation))
 
 clock = pygame.time.Clock()
 bg_particle_effect = bg_particles.Master(leaf_imgs)
+firefly = fireflies.Fireflies(0, 0, 4000, 1000)
 
 safe = False
 
@@ -92,7 +96,7 @@ while run:
     
     #Drawing birds
     for birdie in birdies:
-        birdie.move(safe, player.get_rect().x, player.get_rect().y)
+        birdie.move(time,safe, player.get_rect().x, player.get_rect().y)
         birdie.draw(display, scroll)
     
     player.move(tile_rects, time)
@@ -103,6 +107,7 @@ while run:
             run = False
     
     bg_particle_effect.recursive_call(time, display, scroll, 1)
+    firefly.recursive_call(time, display, scroll)
 
     surf = pygame.transform.scale(display, (s_width, s_height))
     screen.blit(surf, (0,0))
