@@ -64,7 +64,7 @@ if len(entity_loc['b']) != 0:
 
 clock = pygame.time.Clock()
 bg_particle_effect = bg_particles.Master(leaf_imgs)
-firefly = fireflies.Fireflies(0, 0, 4000, 1000)
+firefly = fireflies.Fireflies(0, 0, 2000, 1000)
 
 safe = False
 
