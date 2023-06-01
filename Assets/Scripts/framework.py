@@ -1,6 +1,6 @@
 import pygame
 class Player():
-    def __init__(self, x, y, width, height) -> None:
+    def __init__(self, x, y, width, height, idle_animation, run_animation) -> None:
         self.rect = pygame.rect.Rect(x, y, width, height)
         self.movement = [0,0]
         self.display_x = 0
@@ -11,6 +11,12 @@ class Player():
         self.speed = 4
         self.display_x = 0
         self.display_y = 0
+        self.idle_animation = idle_animation
+        self.run_animation = run_animation
+        self.frame = 0
+        self.frame_last_update = 0
+        self.frame_cooldown = 200
+        self.facing_right = True
 
     def collision_test(self, tiles):
         hitlist = []
@@ -46,14 +52,23 @@ class Player():
                 collision_types['top'][1].append(tile)
         return collision_types
     
-    def move(self, tiles):
+    def move(self, tiles, time):
         self.movement = [0, 0]
+
         if self.moving_right:
+            self.facing_right = True
             self.movement[0] += self.speed
             self.moving_right = False
         if self.moving_left:
+            self.facing_right = False
             self.movement[0] -= self.speed
             self.moving_left = False
+
+        if time - self.frame_last_update > self.frame_cooldown:
+            self.frame_last_update = time
+            self.frame += 1
+            if self.frame >= 4:
+                self.frame = 0
 
         self.movement[1] += 8
 
@@ -71,7 +86,19 @@ class Player():
         self.display_y = self.rect.y
         self.rect.x -= scroll[0]
         self.rect.y -= scroll[1]
-        pygame.draw.rect(display, (255,0,0), self.rect)
+        if self.moving_right:
+            display.blit(self.run_animation[self.frame], self.rect)
+        elif self.moving_left:
+            flip = self.run_animation[self.frame].copy()
+            flip = pygame.transform.flip(flip, True, False)
+            display.blit(flip, self.rect)
+        else:
+            if self.facing_right:
+                display.blit(self.idle_animation[self.frame], self.rect)
+            else:
+                flip = self.idle_animation[self.frame].copy()
+                flip = pygame.transform.flip(flip, True, False)
+                display.blit(flip, self.rect)
         self.rect.x = self.display_x
         self.rect.y = self.display_y
     

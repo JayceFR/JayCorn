@@ -22,7 +22,6 @@ class Map():
             tile_names = os.listdir(location_of_tiles + "/collide")
             collide_length = len(tile_names)
             tile_names.sort()
-            print(tile_names)
             self.tile_imgs = []
             for tile_name in tile_names:
                 curr_tile = pygame.image.load(location_of_tiles + "/collide/" + tile_name).convert_alpha()
@@ -32,7 +31,6 @@ class Map():
             tile_names = os.listdir(location_of_tiles + "/non_collide")
             non_collide_length = collide_length +  len(tile_names)
             tile_names.sort()
-            print(tile_names)
             for tile_name in tile_names:
                 curr_tile = pygame.image.load(location_of_tiles + "/non_collide/" + tile_name).convert_alpha()
                 curr_tile = pygame.transform.scale(curr_tile, (width_of_tiles, width_of_tiles))
