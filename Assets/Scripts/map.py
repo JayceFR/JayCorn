@@ -14,7 +14,8 @@ class Tiles():
         return self.rect
 
 class Map():
-    def __init__(self, map_loc, width_of_tiles, location_of_tiles, is_there_collide_tiles = True, is_there_non_collide_tiles = False) -> None:
+    def __init__(self, map_loc, width_of_tiles, location_of_tiles, is_there_collide_tiles = True, is_there_non_collide_tiles = False, entities = {}) -> None:
+        self.entities = entities
         self.list_of_available_signs = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "!", "@", "#", "$", "%", "^", "&", "*", "-", "+", ":", ";", "<", ">", "/", "~"]
         collide_length = 0
         non_collide_length = 0
@@ -54,6 +55,8 @@ class Map():
                     self.tile_rects.append(Tiles(x*width_of_tiles, y*width_of_tiles, width_of_tiles, width_of_tiles, self.tile_imgs[pos]))
                 elif pos < len(self.list_of_available_signs) and pos < non_collide_length:
                     self.tile_rects.append(Tiles(x*width_of_tiles, y*width_of_tiles, width_of_tiles, width_of_tiles, self.tile_imgs[pos], False))
+                elif element in self.entities:
+                    self.entities[element].append([x*width_of_tiles, y*width_of_tiles])
                 x += 1
             y += 1
     
@@ -62,4 +65,4 @@ class Map():
             tile.draw(display, scroll)
     
     def get_rect(self):
-        return self.tile_rects
+        return self.tile_rects, self.entities
