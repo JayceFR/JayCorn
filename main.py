@@ -65,6 +65,21 @@ left_click_img = pygame.image.load("./Assets/Entities/left_click.png").convert_a
 left_click_img = pygame.transform.scale(left_click_img, (left_click_img.get_width()*2, left_click_img.get_height()*2))
 left_click_img.set_colorkey((255,255,255))
 left_click_ani_spritesheet = pygame.image.load("./Assets/Entities/left_click_ani.png").convert_alpha()
+map1_img = pygame.image.load("./Assets/Entities/map1.png").convert_alpha()
+map1_img = pygame.transform.scale(map1_img, (map1_img.get_width()*4, map1_img.get_height()*4))
+map1_img.set_colorkey((255,255,255))
+map2_img = pygame.image.load("./Assets/Entities/map2.png").convert_alpha()
+map2_img = pygame.transform.scale(map2_img, (map2_img.get_width()*4, map2_img.get_height()*4))
+map2_img.set_colorkey((255,255,255))
+map3_img = pygame.image.load("./Assets/Entities/map3.png").convert_alpha()
+map3_img = pygame.transform.scale(map3_img, (map3_img.get_width()*4, map3_img.get_height()*4))
+map3_img.set_colorkey((255,255,255))
+map4_img = pygame.image.load("./Assets/Entities/map4.png").convert_alpha()
+map4_img = pygame.transform.scale(map4_img, (map4_img.get_width()*4, map4_img.get_height()*4))
+map4_img.set_colorkey((255,255,255))
+map5_img = pygame.image.load("./Assets/Entities/map5.png").convert_alpha()
+map5_img = pygame.transform.scale(map5_img, (map5_img.get_width()*4, map5_img.get_height()*4))
+map5_img.set_colorkey((255,255,255))
 leaf_imgs = [leaf_img, leaf_img2]
 
 squirrel_idle_animation = []
@@ -91,7 +106,7 @@ if len(entity_loc['b']) != 0:
         birdies.append(bird.Bird(loc[0], loc[1], 32, 32, bird_animation))
 
 acorns = []
-final_destination = [[(996,360), "map.png", False], [(2299,838), "map.png", False], [(1335,360), "map.png", False] , [(1932,582), "map.png", False], [(2599,198), "map.png", False]]
+final_destination = [[(996,360), map1_img, False], [(2299,838), map2_img, False], [(1335,360), map3_img, False] , [(1932,582), map4_img, False], [(2599,198), map5_img, False]]
 if len(entity_loc['a']) != 0:
     for pos, loc in enumerate(entity_loc['a']):
         acorns.append(jaycorn.Acorn(loc[0], loc[1], acorn_idle_animation[0].get_width(), acorn_idle_animation[0].get_height(), acorn_idle_animation, pos))
@@ -124,6 +139,8 @@ safe = False
 acorn_pos = -1
 
 game_over = True
+
+show_map = False
 
 while run:
     clock.tick(60)
@@ -212,10 +229,21 @@ while run:
             if event.button == 1:
                 if click:
                     click = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_e:
+                if show_map:
+                    show_map = False
+                else:
+                    show_map = True
+        
 
     
     bg_particle_effect.recursive_call(time, display, scroll, 1)
     firefly.recursive_call(time, display, scroll)
+
+    if show_map:
+        if final_destination[acorn_pos][2] != True:
+            display.blit(final_destination[acorn_pos][1], (0,0))
 
     surf = pygame.transform.scale(display, (s_width, s_height))
     screen.blit(surf, (0,0))
