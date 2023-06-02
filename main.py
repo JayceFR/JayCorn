@@ -58,9 +58,9 @@ for x in range(4):
     squrrel_run_animation.append(get_image(squirrel_run_spritesheet, x, 30, 18, 1.5, (63, 72, 204), [25*1.5,24*1.5]))
     bird_animation.append(get_image(bird_img, x, 22, 14, 2, (69,40,60)))
 
-map = maps.Map("./Assets/Maps/map.txt", 32, "./Assets/Tiles", True, True, {"o": [], "p" : [], "b" : [], "p" : []})
+map = maps.Map("./Assets/Maps/map.txt", 32, "./Assets/Tiles", True, True, {"o": [], "p" : [], "b" : [], "s" : []})
 tile_rects, entity_loc = map.get_rect()
-player = engine.Player(entity_loc['p'][0][0],entity_loc['p'][0][1], squirrel_idle_animation[0].get_width(), squirrel_idle_animation[1].get_height(), squirrel_idle_animation, squrrel_run_animation, squirrel_jump, squirrel_fall)
+player = engine.Player(entity_loc['s'][0][0],entity_loc['s'][0][1], squirrel_idle_animation[0].get_width(), squirrel_idle_animation[1].get_height(), squirrel_idle_animation, squrrel_run_animation, squirrel_jump, squirrel_fall)
 true_scroll = [0,0]
 run = True
 
@@ -79,6 +79,7 @@ while run:
     clock.tick(60)
     time = pygame.time.get_ticks()
     display.fill((0,0,0))
+    print(clock.get_fps())
 
     true_scroll[0] += (player.get_rect().x - true_scroll[0] - 202) / 5
     true_scroll[1] += (player.get_rect().y - true_scroll[1] - 132) / 5
