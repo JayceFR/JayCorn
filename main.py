@@ -4,6 +4,7 @@ import Assets.Scripts.framework as engine
 import Assets.Scripts.bg_particles as bg_particles
 import Assets.Scripts.bird as bird
 import Assets.Scripts.fireflies as fireflies
+import Assets.Scripts.grass as g
 
 
 pygame.init()
@@ -25,6 +26,12 @@ def get_image(sheet, frame, width, height, scale, colorkey, scale_coordinates = 
         image = pygame.transform.scale(image, scale_coordinates )
     image.set_colorkey(colorkey)
     return image
+
+def blit_grass(grasses, display, scroll, player):
+    for grass in grasses:
+        if grass.get_rect().colliderect(player.get_rect()):
+            grass.colliding()
+        grass.draw(display, scroll)
 
 
 #Loading images
@@ -58,7 +65,7 @@ for x in range(4):
     squrrel_run_animation.append(get_image(squirrel_run_spritesheet, x, 30, 18, 1.5, (63, 72, 204), [25*1.5,24*1.5]))
     bird_animation.append(get_image(bird_img, x, 22, 14, 2, (69,40,60)))
 
-map = maps.Map("./Assets/Maps/map.txt", 32, "./Assets/Tiles", True, True, {"o": [], "p" : [], "b" : [], "s" : []})
+map = maps.Map("./Assets/Maps/map.txt", 32, "./Assets/Tiles", True, True, {"o": [], "p" : [], "b" : [], "s" : [], "g" : []})
 tile_rects, entity_loc = map.get_rect()
 player = engine.Player(entity_loc['s'][0][0],entity_loc['s'][0][1], squirrel_idle_animation[0].get_width(), squirrel_idle_animation[1].get_height(), squirrel_idle_animation, squrrel_run_animation, squirrel_jump, squirrel_fall)
 true_scroll = [0,0]
@@ -73,6 +80,17 @@ clock = pygame.time.Clock()
 bg_particle_effect = bg_particles.Master(leaf_imgs)
 firefly = fireflies.Fireflies(0, 100, 3000, 1000)
 
+#Grass
+grasses = []
+for loc in entity_loc['g']:
+    x_pos = loc[0]
+    while x_pos < loc[0] + 32:
+        x_pos += 2.5
+        grasses.append(g.grass([x_pos, loc[1]+(14*2)], 2, 9))
+grass_loc = []
+grass_last_update = 0
+grass_cooldown = 50
+
 safe = False
 
 while run:
@@ -86,6 +104,12 @@ while run:
     scroll = true_scroll.copy()
     scroll[0] = int(scroll[0])
     scroll[1] = int(scroll[1])
+
+    #Grass movement
+    if time - grass_last_update > grass_cooldown:
+        for grass in grasses:
+            grass.move()
+        grass_last_update = time
 
     map.draw(display, scroll)
 
@@ -109,6 +133,8 @@ while run:
     
     player.move(tile_rects, time)
     player.draw(display, scroll)
+
+    blit_grass(grasses, display, scroll, player)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
