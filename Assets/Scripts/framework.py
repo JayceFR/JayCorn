@@ -1,4 +1,5 @@
 import pygame
+from pygame.locals import *
 class Player():
     def __init__(self, x, y, width, height, idle_animation, run_animation, jump_img, fall_img) -> None:
         self.rect = pygame.rect.Rect(x, y, width, height)
@@ -21,7 +22,8 @@ class Player():
         self.jump_img = jump_img
         self.fall_img = fall_img
         self.jump_last_update = 0
-        self.jump_cooldown = 500
+        self.radius = width 
+        self.jump_cooldown = 200
         self.jump_up_spped = 9
         self.air_timer = 0
         self.falling = False
@@ -173,10 +175,17 @@ class Player():
                 flip = pygame.transform.flip(flip, True, False)
                 display.blit(flip, self.rect)
         
+        display.blit(self.circle_surf(), (self.rect.x - 15, self.rect.y - 15), special_flags=BLEND_RGBA_ADD)
 
         self.rect.x = self.display_x
         self.rect.y = self.display_y
     
     def get_rect(self):
         return self.rect
+
+    def circle_surf(self):
+        surf = pygame.Surface((self.radius * 4, self.radius * 4))
+        pygame.draw.circle(surf, (20, 20,20), (self.radius, self.radius), self.radius)
+        surf.set_colorkey((0, 0, 0))
+        return surf
 

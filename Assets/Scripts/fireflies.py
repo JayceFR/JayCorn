@@ -28,7 +28,7 @@ class FireFly():
     
     def circle_surf(self):
         surf = pygame.Surface((self.radius * 4, self.radius * 4))
-        pygame.draw.circle(surf, (0, 0, 20), (self.radius, self.radius), self.radius)
+        pygame.draw.circle(surf, (0, 0, 50), (self.radius, self.radius), self.radius)
         surf.set_colorkey((0, 0, 0))
         return surf
     
@@ -40,7 +40,7 @@ class Fireflies():
         self.width_of_entire_game = width_of_entire_game * 2
         self.height_of_entire_game = height_of_entire_game * 2
         self.fireflies = []
-        for x in range(60):
+        for x in range(80):
             self.fireflies.append(FireFly(random.randint(-100,self.width_of_entire_game)//2, random.randint(-100,self.height_of_entire_game)//2, 2))
             
     def recursive_call(self, time, display, scroll):
