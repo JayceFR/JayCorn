@@ -2,10 +2,12 @@ import pygame
 import os 
 
 class Tiles():
-    def __init__(self, x, y, width, height, img, touchable = True) -> None:
+    def __init__(self, x, y, width, height, img, touchable = True, ramp = False, ramp_type = 1) -> None:
         self.rect = pygame.rect.Rect(x, y, width, height)
         self.img = img
         self.touchable = touchable
+        self.ramp = ramp
+        self.ramp_type = ramp_type
     
     def draw(self, display, scroll):
         display.blit(self.img, (self.rect.x - scroll[0], self.rect.y - scroll[1]))
@@ -16,7 +18,7 @@ class Tiles():
 class Map():
     def __init__(self, map_loc, width_of_tiles, location_of_tiles, is_there_collide_tiles = True, is_there_non_collide_tiles = False, entities = {}) -> None:
         self.entities = entities
-        self.list_of_available_signs = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "!", "@", "#", "$", "%", "^", "&", "*", "-", "+", ":", ";", "<", ">", "/", "~"]
+        self.list_of_available_signs = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "!", "@", "#", "$", "%", "^", "&", "*", "-", "+", ":", ";", "<", ">", "/", "~", "|"]
         collide_length = 0
         non_collide_length = 0
         if is_there_collide_tiles:
@@ -51,7 +53,11 @@ class Map():
                 pos = 0
                 while pos < len(self.list_of_available_signs) and self.list_of_available_signs[pos] != element:
                     pos += 1
-                if pos < len(self.list_of_available_signs) and pos < collide_length:
+                if element == "&":
+                    self.tile_rects.append(Tiles(x*width_of_tiles, y*width_of_tiles, width_of_tiles, width_of_tiles, self.tile_imgs[pos], ramp=True))
+                elif element == "*":
+                    self.tile_rects.append(Tiles(x*width_of_tiles, y*width_of_tiles, width_of_tiles, width_of_tiles, self.tile_imgs[pos], ramp=True, ramp_type=2))
+                elif pos < len(self.list_of_available_signs) and pos < collide_length:
                     self.tile_rects.append(Tiles(x*width_of_tiles, y*width_of_tiles, width_of_tiles, width_of_tiles, self.tile_imgs[pos]))
                 elif pos < len(self.list_of_available_signs) and pos < non_collide_length:
                     self.tile_rects.append(Tiles(x*width_of_tiles, y*width_of_tiles, width_of_tiles, width_of_tiles, self.tile_imgs[pos], False))

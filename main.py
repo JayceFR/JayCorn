@@ -41,6 +41,13 @@ tree_img2 = pygame.image.load("./Assets/Entities/tree2.png").convert_alpha()
 tree_img2 = pygame.transform.scale(tree_img2, (tree_img2.get_width()*1.5, tree_img2.get_height()*1.5))
 tree_img2.set_colorkey((0,0,0))
 bird_img = pygame.image.load("./Assets/Sprites/bird_fly.png").convert_alpha()
+squirrel_jump = pygame.image.load("./Assets/Sprites/squirrel_jump.png").convert_alpha()
+squirrel_jump = pygame.transform.scale(squirrel_jump, (25*1.5,24*1.5))
+squirrel_fall = squirrel_jump.copy()
+squirrel_jump = pygame.transform.rotate(squirrel_jump, 45)
+squirrel_jump.set_colorkey((63,72,204))
+squirrel_fall = pygame.transform.rotate(squirrel_fall, -25)
+squirrel_fall.set_colorkey((63,72,204))
 leaf_imgs = [leaf_img, leaf_img2]
 
 squirrel_idle_animation = []
@@ -51,9 +58,9 @@ for x in range(4):
     squrrel_run_animation.append(get_image(squirrel_run_spritesheet, x, 30, 18, 1.5, (63, 72, 204), [25*1.5,24*1.5]))
     bird_animation.append(get_image(bird_img, x, 22, 14, 2, (69,40,60)))
 
-map = maps.Map("./Assets/Maps/map.txt", 32, "./Assets/Tiles", True, True, {"o": [], "p" : [], "b" : []})
+map = maps.Map("./Assets/Maps/map.txt", 32, "./Assets/Tiles", True, True, {"o": [], "p" : [], "b" : [], "p" : []})
 tile_rects, entity_loc = map.get_rect()
-player = engine.Player(50,50, squirrel_idle_animation[0].get_width(), squirrel_idle_animation[1].get_height(), squirrel_idle_animation, squrrel_run_animation)
+player = engine.Player(entity_loc['p'][0][0],entity_loc['p'][0][1], squirrel_idle_animation[0].get_width(), squirrel_idle_animation[1].get_height(), squirrel_idle_animation, squrrel_run_animation, squirrel_jump, squirrel_fall)
 true_scroll = [0,0]
 run = True
 

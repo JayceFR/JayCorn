@@ -1,6 +1,6 @@
 import pygame
 class Player():
-    def __init__(self, x, y, width, height, idle_animation, run_animation) -> None:
+    def __init__(self, x, y, width, height, idle_animation, run_animation, jump_img, fall_img) -> None:
         self.rect = pygame.rect.Rect(x, y, width, height)
         self.movement = [0,0]
         self.display_x = 0
@@ -17,6 +17,14 @@ class Player():
         self.frame_last_update = 0
         self.frame_cooldown = 200
         self.facing_right = True
+        self.jump = False
+        self.jump_img = jump_img
+        self.fall_img = fall_img
+        self.jump_last_update = 0
+        self.jump_cooldown = 600
+        self.jump_up_spped = 9
+        self.air_timer = 0
+        self.falling = False
 
     def collision_test(self, tiles):
         hitlist = []
@@ -31,25 +39,42 @@ class Player():
         self.rect.x += self.movement[0]
         hit_list = self.collision_test(tiles)
         for tile in hit_list:
-            if self.movement[0] > 0:
-                self.rect.right = tile.get_rect().left
-                collision_types["right"][0] = True
-                collision_types["right"][1].append(tile)
-            elif self.movement[0] < 0:
-                self.rect.left = tile.get_rect().right
-                collision_types["left"][0] = True
-                collision_types["left"][1].append(tile)
+            if not tile.ramp:
+                if self.movement[0] > 0:
+                    self.rect.right = tile.get_rect().left
+                    collision_types["right"][0] = True
+                    collision_types["right"][1].append(tile)
+                elif self.movement[0] < 0:
+                    self.rect.left = tile.get_rect().right
+                    collision_types["left"][0] = True
+                    collision_types["left"][1].append(tile)
         self.rect.y += self.movement[1]
         hit_list = self.collision_test(tiles)
         for tile in hit_list:
-            if self.movement[1] > 0:
-                self.rect.bottom = tile.get_rect().top
-                collision_types["bottom"][0] = True
-                collision_types["bottom"][1].append(tile)
-            if self.movement[1] < 0:
-                self.rect.top = tile.get_rect().bottom
-                collision_types["top"][0] = True
-                collision_types['top'][1].append(tile)
+            if not tile.ramp:
+                if self.movement[1] > 0:
+                    self.rect.bottom = tile.get_rect().top
+                    collision_types["bottom"][0] = True
+                    collision_types["bottom"][1].append(tile)
+                if self.movement[1] < 0:
+                    self.rect.top = tile.get_rect().bottom
+                    collision_types["top"][0] = True
+                    collision_types['top'][1].append(tile)
+        
+        for tile in hit_list:
+            if tile.ramp == True:
+                rel_x = self.rect.x - tile.get_rect().x
+                if tile.ramp_type == 1:
+                    pos_height = rel_x + self.rect.width
+                elif tile.ramp_type == 2:
+                    pos_height = 32 - rel_x
+                pos_height = min(pos_height, 32)
+                pos_height = max(pos_height, 0)
+                target_y = tile.get_rect().y + 32 - pos_height
+                if self.rect.bottom > target_y:
+                    self.rect.bottom = target_y
+                    collision_types["bottom"][0] = True
+                    self.movement[1] = self.rect.y
         return collision_types
     
     def move(self, tiles, time):
@@ -63,6 +88,15 @@ class Player():
             self.facing_right = False
             self.movement[0] -= self.speed
             self.moving_left = False
+        if self.jump:
+            if self.air_timer < 40:
+                self.air_timer += 1
+                self.movement[1] -= self.jump_up_spped
+                self.jump_up_spped -= 0.5
+            else:
+                self.air_timer = 0
+                self.jump = False
+                self.jump_up_spped = 9
 
         if time - self.frame_last_update > self.frame_cooldown:
             self.frame_last_update = time
@@ -70,23 +104,56 @@ class Player():
             if self.frame >= 4:
                 self.frame = 0
 
-        self.movement[1] += 8
+        if not self.jump:
+            self.movement[1] += 8
+
+        
 
         self.collision_type = self.collision_checker(tiles)
 
+        if not self.collision_type['bottom'][0]:
+            self.falling = True
+        else:
+            self.falling = False
 
         key = pygame.key.get_pressed()
         if  key[pygame.K_a]:
             self.moving_left = True
         if key[pygame.K_d]:
             self.moving_right = True
+        if key[pygame.K_SPACE] or key[pygame.K_w]:
+            if not self.jump and self.collision_type['bottom'][0]:
+                if time - self.jump_last_update > self.jump_cooldown:
+                    #self.music.play()
+                    self.jump = True
     
     def draw(self, display, scroll):
         self.display_x = self.rect.x
         self.display_y = self.rect.y
         self.rect.x -= scroll[0]
         self.rect.y -= scroll[1]
-        if self.moving_right:
+        if self.air_timer >= 1 and self.air_timer > 20:
+            if self.facing_right:
+                display.blit(self.fall_img, self.rect)
+            else:
+                flip = self.fall_img.copy()
+                flip = pygame.transform.flip(flip, True, False)
+                display.blit(flip, self.rect)
+        elif not self.jump and  self.falling:
+            if self.facing_right:
+                display.blit(self.fall_img, self.rect)
+            else:
+                flip = self.fall_img.copy()
+                flip = pygame.transform.flip(flip, True, False)
+                display.blit(flip, self.rect)
+        elif self.jump:
+            if self.facing_right:
+                display.blit(self.jump_img, self.rect)
+            else:
+                flip = self.jump_img.copy()
+                flip = pygame.transform.flip(flip, True, False)
+                display.blit(flip, self.rect)
+        elif self.moving_right:
             display.blit(self.run_animation[self.frame], self.rect)
         elif self.moving_left:
             flip = self.run_animation[self.frame].copy()
@@ -99,6 +166,8 @@ class Player():
                 flip = self.idle_animation[self.frame].copy()
                 flip = pygame.transform.flip(flip, True, False)
                 display.blit(flip, self.rect)
+        
+
         self.rect.x = self.display_x
         self.rect.y = self.display_y
     

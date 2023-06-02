@@ -21,7 +21,7 @@ class FireFly():
         self.y += math.sin(math.radians(self.angle)) * 0.5
     
     def draw(self, display, scroll):
-        pygame.draw.circle(display, (0, 15, 158), (self.x - scroll[0], self.y - scroll[1]), self.radius)
+        pygame.draw.circle(display, (255, 255, 255), (self.x - scroll[0], self.y - scroll[1]), self.radius)
         self.radius *= 8
         display.blit(self.circle_surf(), (int(self.x- self.radius) - scroll[0], int(self.y - self.radius) - scroll[1]), special_flags=BLEND_RGBA_ADD)
         self.radius /= 8
@@ -41,7 +41,7 @@ class Fireflies():
         self.height_of_entire_game = height_of_entire_game * 2
         self.fireflies = []
         for x in range(60):
-            self.fireflies.append(FireFly(random.randint(-100,self.width_of_entire_game)//2, random.randint(-100,self.height_of_entire_game)//2, 4))
+            self.fireflies.append(FireFly(random.randint(-100,self.width_of_entire_game)//2, random.randint(-100,self.height_of_entire_game)//2, 2))
             
     def recursive_call(self, time, display, scroll):
         for firefly in self.fireflies:
