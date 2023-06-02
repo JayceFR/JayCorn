@@ -5,6 +5,8 @@ import Assets.Scripts.bg_particles as bg_particles
 import Assets.Scripts.bird as bird
 import Assets.Scripts.fireflies as fireflies
 import Assets.Scripts.grass as g
+import Assets.Scripts.acorn as jaycorn
+import Assets.Scripts.chuma as chuma
 
 
 pygame.init()
@@ -55,17 +57,29 @@ squirrel_jump = pygame.transform.rotate(squirrel_jump, 45)
 squirrel_jump.set_colorkey((63,72,204))
 squirrel_fall = pygame.transform.rotate(squirrel_fall, -25)
 squirrel_fall.set_colorkey((63,72,204))
+acorn_idle_spritesheet = pygame.image.load("./Assets/Entities/acorn_idle.png").convert_alpha()
+acorn_img = pygame.image.load("./Assets/Entities/acorn.png").convert_alpha()
+acorn_img = pygame.transform.scale(acorn_img, (acorn_img.get_width()*2, acorn_img.get_height()*2))
+acorn_img.set_colorkey((0,0,0))    
+left_click_img = pygame.image.load("./Assets/Entities/left_click.png").convert_alpha()
+left_click_img = pygame.transform.scale(left_click_img, (left_click_img.get_width()*2, left_click_img.get_height()*2))
+left_click_img.set_colorkey((255,255,255))
+left_click_ani_spritesheet = pygame.image.load("./Assets/Entities/left_click_ani.png").convert_alpha()
 leaf_imgs = [leaf_img, leaf_img2]
 
 squirrel_idle_animation = []
 squrrel_run_animation = []
 bird_animation = []
+acorn_idle_animation = []
+left_click_animation = []
 for x in range(4):
     squirrel_idle_animation.append(get_image(squirrel_idle_spritesheet, x, 25, 24, 1.5, (63, 72, 204)))
     squrrel_run_animation.append(get_image(squirrel_run_spritesheet, x, 30, 18, 1.5, (63, 72, 204), [25*1.5,24*1.5]))
     bird_animation.append(get_image(bird_img, x, 22, 14, 2, (69,40,60)))
+    acorn_idle_animation.append(get_image(acorn_idle_spritesheet, x, 11, 12, 1.5, (0,0,0)))
+    left_click_animation.append(get_image(left_click_ani_spritesheet, x, 6, 11, 2, (255,255,255)))
 
-map = maps.Map("./Assets/Maps/map.txt", 32, "./Assets/Tiles", True, True, {"o": [], "p" : [], "b" : [], "s" : [], "g" : []})
+map = maps.Map("./Assets/Maps/map.txt", 32, "./Assets/Tiles", True, True, {"o": [], "p" : [], "b" : [], "s" : [], "g" : [], "a" : []})
 tile_rects, entity_loc = map.get_rect()
 player = engine.Player(entity_loc['s'][0][0],entity_loc['s'][0][1], squirrel_idle_animation[0].get_width(), squirrel_idle_animation[1].get_height(), squirrel_idle_animation, squrrel_run_animation, squirrel_jump, squirrel_fall)
 true_scroll = [0,0]
@@ -75,6 +89,12 @@ birdies = []
 if len(entity_loc['b']) != 0:
     for loc in entity_loc['b']:
         birdies.append(bird.Bird(loc[0], loc[1], 32, 32, bird_animation))
+
+acorns = []
+if len(entity_loc['a']) != 0:
+    for loc in entity_loc['a']:
+        acorns.append(jaycorn.Acorn(loc[0], loc[1], acorn_idle_animation[0].get_width(), acorn_idle_animation[0].get_height(), acorn_idle_animation))
+
 
 clock = pygame.time.Clock()
 bg_particle_effect = bg_particles.Master(leaf_imgs)
@@ -90,6 +110,10 @@ for loc in entity_loc['g']:
 grass_loc = []
 grass_last_update = 0
 grass_cooldown = 50
+
+#Chuma stuff
+left_click = chuma.Chuma(left_click_animation)
+click = False
 
 safe = False
 
@@ -134,11 +158,29 @@ while run:
     player.move(tile_rects, time)
     player.draw(display, scroll)
 
+    for pos, acorn in sorted(enumerate(acorns), reverse=True):
+        if player.get_rect().colliderect(acorn.get_rect()):
+            left_click.draw(time, display, [0,0], (350, 200))
+            if click:
+                acorns.pop(pos)
+        acorn.move(time, tile_rects)
+        acorn.draw(display, scroll)
+        
+
     blit_grass(grasses, display, scroll, player)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                if not click:
+                    click = True
+        if event.type == pygame.MOUSEBUTTONUP:
+            if event.button == 1:
+                if click:
+                    click = False
+
     
     bg_particle_effect.recursive_call(time, display, scroll, 1)
     firefly.recursive_call(time, display, scroll)
