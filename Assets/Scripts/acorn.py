@@ -1,7 +1,7 @@
 import pygame
 
 class Acorn():
-    def __init__(self, x, y, width, height, idle_animation) -> None:
+    def __init__(self, x, y, width, height, idle_animation, id) -> None:
         self.rect = pygame.rect.Rect(x, y, width, height)
         self.idle_animation = idle_animation
         self.movement = [0,0]
@@ -9,6 +9,7 @@ class Acorn():
         self.frame_last_update = 0
         self.frame_cooldown = 200
         self.collision_type = {}
+        self.id = id
     
     def draw(self, display, scroll):
         display.blit(self.idle_animation[self.frame], (self.rect.x - scroll[0], self.rect.y - scroll[1]))
@@ -63,4 +64,7 @@ class Acorn():
     
     def get_rect(self):
         return self.rect
+
+    def get_id(self):
+        return self.id
 

@@ -59,7 +59,7 @@ squirrel_fall = pygame.transform.rotate(squirrel_fall, -25)
 squirrel_fall.set_colorkey((63,72,204))
 acorn_idle_spritesheet = pygame.image.load("./Assets/Entities/acorn_idle.png").convert_alpha()
 acorn_img = pygame.image.load("./Assets/Entities/acorn.png").convert_alpha()
-acorn_img = pygame.transform.scale(acorn_img, (acorn_img.get_width()*2, acorn_img.get_height()*2))
+acorn_img = pygame.transform.scale(acorn_img, (acorn_img.get_width()*5, acorn_img.get_height()*5))
 acorn_img.set_colorkey((0,0,0))    
 left_click_img = pygame.image.load("./Assets/Entities/left_click.png").convert_alpha()
 left_click_img = pygame.transform.scale(left_click_img, (left_click_img.get_width()*2, left_click_img.get_height()*2))
@@ -91,9 +91,10 @@ if len(entity_loc['b']) != 0:
         birdies.append(bird.Bird(loc[0], loc[1], 32, 32, bird_animation))
 
 acorns = []
+final_destination = [[(996,360), "map.png", False], [(2299,838), "map.png", False], [(1335,360), "map.png", False] , [(1932,582), "map.png", False], [(2599,198), "map.png", False]]
 if len(entity_loc['a']) != 0:
-    for loc in entity_loc['a']:
-        acorns.append(jaycorn.Acorn(loc[0], loc[1], acorn_idle_animation[0].get_width(), acorn_idle_animation[0].get_height(), acorn_idle_animation))
+    for pos, loc in enumerate(entity_loc['a']):
+        acorns.append(jaycorn.Acorn(loc[0], loc[1], acorn_idle_animation[0].get_width(), acorn_idle_animation[0].get_height(), acorn_idle_animation, pos))
 
 
 clock = pygame.time.Clock()
@@ -115,13 +116,30 @@ grass_cooldown = 50
 left_click = chuma.Chuma(left_click_animation)
 click = False
 
+#Inventory
+has_acorn = False
+
 safe = False
+
+acorn_pos = -1
+
+game_over = True
 
 while run:
     clock.tick(60)
     time = pygame.time.get_ticks()
     display.fill((0,0,0))
     #print(clock.get_fps())
+
+    #print(player.get_rect().x, player.get_rect().y)
+    game_over = True
+    #Checking if game is over
+    for destination in final_destination:
+        if destination[2] == False:
+            game_over = False
+    if game_over:
+        print("Game over")
+    #print(game_over)
 
     true_scroll[0] += (player.get_rect().x - true_scroll[0] - 202) / 5
     true_scroll[1] += (player.get_rect().y - true_scroll[1] - 132) / 5
@@ -158,16 +176,30 @@ while run:
     player.move(tile_rects, time)
     player.draw(display, scroll)
 
+    
     for pos, acorn in sorted(enumerate(acorns), reverse=True):
-        if player.get_rect().colliderect(acorn.get_rect()):
-            left_click.draw(time, display, [0,0], (350, 200))
-            if click:
-                acorns.pop(pos)
+        if not has_acorn:
+            if player.get_rect().colliderect(acorn.get_rect()):
+                left_click.draw(time, display, [0,0], (350, 200))
+                if click:
+                    acorn_pos = acorn.get_id()
+                    acorns.pop(pos)
+                    has_acorn = True
         acorn.move(time, tile_rects)
         acorn.draw(display, scroll)
         
 
     blit_grass(grasses, display, scroll, player)
+
+    if has_acorn:
+        display.blit(acorn_img, (0,0))
+        if player.get_rect().collidepoint(final_destination[acorn_pos][0]):
+            #Dig animation
+            left_click.draw(time, display, [0,0], (350, 200))
+            if click:
+                final_destination[acorn_pos][2] = True
+                has_acorn = False
+        
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
