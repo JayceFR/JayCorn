@@ -21,10 +21,11 @@ class Player():
         self.jump_img = jump_img
         self.fall_img = fall_img
         self.jump_last_update = 0
-        self.jump_cooldown = 600
+        self.jump_cooldown = 500
         self.jump_up_spped = 9
         self.air_timer = 0
         self.falling = False
+        self.jump_count = 2
 
     def collision_test(self, tiles):
         hitlist = []
@@ -114,6 +115,7 @@ class Player():
         if not self.collision_type['bottom'][0]:
             self.falling = True
         else:
+            self.jump_count = 2
             self.falling = False
 
         key = pygame.key.get_pressed()
@@ -122,10 +124,14 @@ class Player():
         if key[pygame.K_d]:
             self.moving_right = True
         if key[pygame.K_SPACE] or key[pygame.K_w]:
-            if not self.jump and self.collision_type['bottom'][0]:
+            if self.jump_count > 0:
                 if time - self.jump_last_update > self.jump_cooldown:
                     #self.music.play()
                     self.jump = True
+                    self.air_timer = 0
+                    self.jump_up_spped = 9
+                    self.jump_count -= 1
+                    self.jump_last_update = time
     
     def draw(self, display, scroll):
         self.display_x = self.rect.x

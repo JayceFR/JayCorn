@@ -79,7 +79,7 @@ while run:
     clock.tick(60)
     time = pygame.time.get_ticks()
     display.fill((0,0,0))
-    print(clock.get_fps())
+    #print(clock.get_fps())
 
     true_scroll[0] += (player.get_rect().x - true_scroll[0] - 202) / 5
     true_scroll[1] += (player.get_rect().y - true_scroll[1] - 132) / 5
