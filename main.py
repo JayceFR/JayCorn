@@ -10,6 +10,8 @@ import Assets.Scripts.acorn as jaycorn
 import Assets.Scripts.chuma as chuma
 import Assets.Scripts.sparks as spark
 import Assets.Scripts.typewriter as typewriter
+import Assets.Scripts.shader as shader
+import time as t
 
 
 pygame.init()
@@ -18,8 +20,11 @@ from pygame.locals import *
 
 s_width = 800
 s_height = 500
-screen = pygame.display.set_mode((s_width, s_height))
+window = pygame.display.set_mode((s_width, s_height), pygame.OPENGL | pygame.DOUBLEBUF)
+screen = pygame.Surface((s_width, s_height))
 display = pygame.Surface((s_width//2, s_height//2))
+ui_display = pygame.Surface((s_width//2, s_height//2), pygame.SRCALPHA)
+pygame.display.set_caption("JayCorn")
 
 
 def get_image(sheet, frame, width, height, scale, colorkey, scale_coordinates = []):
@@ -162,8 +167,12 @@ show_jump_ani_last_update = 0
 show_jump_ani_cooldown = 600
 click = False
 
+#Shader stuff
+shader_obj = shader.Shader(True, "./Assets/Shader/vertex.vert", "./Assets/Shader/fragment.frag")
+noise_img = pygame.image.load("./Assets/Shader/pnoise.png").convert_alpha()
+
 #Typer seetings
-font = pygame.font.Font("./Assets/Fonts/jayce.ttf", 15)
+font = pygame.font.Font("./Assets/Fonts/jayce.ttf", 16)
 typer = typewriter.TypeWriter(font, (40,135,140), 40, 10, 400,9)
 done_typing = False
 
@@ -187,10 +196,12 @@ show_map = False
 
 initialise_type_writer = True
 
+start_time = t.time()
 while run:
     clock.tick(60)
     time = pygame.time.get_ticks()
     display.fill((0,0,0))
+    ui_display.fill((0,0,0,0))
     #print(clock.get_fps())
 
     #print(player.get_rect().x, player.get_rect().y)
@@ -252,7 +263,7 @@ while run:
     for pos, acorn in sorted(enumerate(acorns), reverse=True):
         if not has_acorn:
             if player.get_rect().colliderect(acorn.get_rect()):
-                left_click.draw(time, display, [0,0], (350, 200))
+                left_click.draw(time, ui_display, [0,0], (350, 200))
                 if click:
                     acorn_pos = acorn.get_id()
                     acorns.pop(pos)
@@ -264,10 +275,10 @@ while run:
     blit_grass(grasses, display, scroll, player)
 
     if has_acorn:
-        display.blit(acorn_img, (0,0))
+        ui_display.blit(acorn_img, (0,0))
         if player.get_rect().collidepoint(final_destination[acorn_pos][0]):
             #Dig animation
-            left_click.draw(time, display, [0,0], (350, 200))
+            left_click.draw(time, ui_display, [0,0], (350, 200))
             if click:
                 final_destination[acorn_pos][2] = True
                 acorns_buried += 1
@@ -298,7 +309,7 @@ while run:
                 show_jump_ani_last_update = time
         
     if show_jump_ani[0] == True:
-        jump_spark.draw(time, display, scroll, show_jump_ani[1])
+        jump_spark.draw(time, ui_display, scroll, show_jump_ani[1])
         if time - show_jump_ani_last_update > show_jump_ani_cooldown:
             jump_spark.reset_frame()
             show_jump_ani[0] = False
@@ -308,22 +319,24 @@ while run:
 
     for s in sparks:
         s.move(1)
-        s.draw(display)
+        s.draw(ui_display)
 
     if show_map:
         if final_destination[acorn_pos][2] != True:
             #display.blit(final_destination[acorn_pos][1], (0,0))
-            final_destination[acorn_pos][1].draw(time, display, [0,0], (0,0))
+            final_destination[acorn_pos][1].draw(time, ui_display, [0,0], (0,0))
 
     if game_over:
         if not done_typing:
             surface = pygame.Surface((500, 100))
-            pygame.draw.rect(surface, (80,80,80), pygame.rect.Rect(0,0,500,100))
+            pygame.draw.rect(surface, (255,255,255), pygame.rect.Rect(0,0,500,100))
             surface.set_colorkey((0,0,0))
-            display.blit(surface, (0,0), special_flags=BLEND_RGB_ADD)
-            done_typing = typer.update(time, display)
+            ui_display.blit(surface, (0,0), special_flags=BLEND_RGB_ADD)
+            done_typing = typer.update(time, ui_display)
 
     surf = pygame.transform.scale(display, (s_width, s_height))
     screen.blit(surf, (0,0))
+
+    shader_obj.draw({"tex" : screen, "noise_tex1": noise_img, "ui_tex" : ui_display}, { "itime": int((t.time() - start_time) * 100) })
     
     pygame.display.flip()
