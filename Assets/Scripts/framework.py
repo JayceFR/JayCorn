@@ -80,7 +80,7 @@ class Player():
                     self.movement[1] = self.rect.y
         return collision_types
     
-    def move(self, tiles, time):
+    def move(self, tiles, time, done_tutorial):
         self.movement = [0, 0]
 
         if self.moving_right:
@@ -120,20 +120,21 @@ class Player():
             self.jump_count = 2
             self.falling = False
 
-        key = pygame.key.get_pressed()
-        if  key[pygame.K_a]:
-            self.moving_left = True
-        if key[pygame.K_d]:
-            self.moving_right = True
-        if key[pygame.K_SPACE] or key[pygame.K_w]:
-            if self.jump_count > 0:
-                if time - self.jump_last_update > self.jump_cooldown:
-                    #self.music.play()
-                    self.jump = True
-                    self.air_timer = 0
-                    self.jump_up_spped = 9
-                    self.jump_count -= 1
-                    self.jump_last_update = time
+        if done_tutorial:
+            key = pygame.key.get_pressed()
+            if  key[pygame.K_a] or key[pygame.K_LEFT]:
+                self.moving_left = True
+            if key[pygame.K_d] or key[pygame.K_RIGHT]:
+                self.moving_right = True
+            if key[pygame.K_SPACE] or key[pygame.K_w]:
+                if self.jump_count > 0:
+                    if time - self.jump_last_update > self.jump_cooldown:
+                        #self.music.play()
+                        self.jump = True
+                        self.air_timer = 0
+                        self.jump_up_spped = 9
+                        self.jump_count -= 1
+                        self.jump_last_update = time
     
     def draw(self, display, scroll):
         self.display_x = self.rect.x

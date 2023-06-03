@@ -43,6 +43,10 @@ def blit_grass(grasses, display, scroll, player):
             grass.colliding()
         grass.draw(display, scroll)
 
+def draw_text(text, font, text_col, x, y, display):
+    img = font.render(text, True, text_col)
+    display.blit(img, (x, y))
+
 
 #Loading images
 squirrel_idle_spritesheet = pygame.image.load("./Assets/Sprites/squirrel_idle.png").convert_alpha()
@@ -67,7 +71,10 @@ squirrel_fall = pygame.transform.rotate(squirrel_fall, -25)
 squirrel_fall.set_colorkey((63,72,204))
 acorn_idle_spritesheet = pygame.image.load("./Assets/Entities/acorn_idle.png").convert_alpha()
 acorn_img = pygame.image.load("./Assets/Entities/acorn.png").convert_alpha()
+acorn_logo_img = acorn_img.copy()
+acorn_logo_img = pygame.transform.scale(acorn_logo_img, (acorn_img.get_width()*2, acorn_img.get_height()*2))
 acorn_img = pygame.transform.scale(acorn_img, (acorn_img.get_width()*5, acorn_img.get_height()*5))
+acorn_logo_img.set_colorkey((0,0,0))
 acorn_img.set_colorkey((0,0,0))    
 left_click_img = pygame.image.load("./Assets/Entities/left_click.png").convert_alpha()
 left_click_img = pygame.transform.scale(left_click_img, (left_click_img.get_width()*2, left_click_img.get_height()*2))
@@ -102,6 +109,9 @@ fence_img.set_colorkey((255,255,255))
 house_img = pygame.image.load("./Assets/Entities/housy.png").convert_alpha()
 house_img = pygame.transform.scale(house_img, (house_img.get_width()*2, house_img.get_height()*2))
 house_img.set_colorkey((255,255,255))
+squirrel_head = pygame.image.load("./Assets/Entities/squirrel_head.png").convert_alpha()
+squirrel_head = pygame.transform.scale(squirrel_head, (squirrel_head.get_width()*4, squirrel_head.get_height()*4))
+squirrel_head.set_colorkey((63, 72, 204))
 leaf_imgs = [leaf_img, leaf_img2]
 
 squirrel_idle_animation = []
@@ -120,7 +130,7 @@ for x in range(4):
     squrrel_run_animation.append(get_image(squirrel_run_spritesheet, x, 30, 18, 1.5, (63, 72, 204), [25*1.5,24*1.5]))
     bird_animation.append(get_image(bird_img, x, 22, 14, 2, (69,40,60)))
     acorn_idle_animation.append(get_image(acorn_idle_spritesheet, x, 11, 12, 1.5, (0,0,0)))
-    left_click_animation.append(get_image(left_click_ani_spritesheet, x, 6, 11, 2, (255,255,255)))
+    left_click_animation.append(get_image(left_click_ani_spritesheet, x, 6, 11, 4, (255,255,255)))
     jump_spark_animation.append(get_image(jump_spark_img, x, 32, 32, 1, (0,0,0)))
     map1_ani.append(get_image(map1_ani_spritesheet, x, 96, 59, 4, (255,255,255)))
     map2_ani.append(get_image(map2_ani_spritesheet, x, 96, 59, 4, (255,255,255)))
@@ -180,9 +190,12 @@ shader_obj = shader.Shader(True, "./Assets/Shader/vertex.vert", "./Assets/Shader
 noise_img = pygame.image.load("./Assets/Shader/pnoise.png").convert_alpha()
 
 #Typer seetings
-font = pygame.font.Font("./Assets/Fonts/jayce.ttf", 16)
+font = pygame.font.Font("./Assets/Fonts/jayce.ttf", 18)
 typer = typewriter.TypeWriter(font, (40,135,140), 40, 10, 400,9)
+tutorial_typer = typewriter.TypeWriter(font, (0,19,127), 80, 180, 400, 9)
+tutorial_typer.write(["Hi There", "I am Jay the squirrel", "As it is Autumn now, The next season is Winter", "Can you please help me...", "Find acorns and bury them into specific locations", "Beware of birds", "They may steal your Acorn", "Hide under trees to save your self"])
 done_typing = False
+done_tutorial = False
 
 final_destination = [[(996,360), map_1, False], [(2299,838), map_2, False], [(1335,360), map_3, False] , [(1932,582), map_4, False], [(2599,198), map_5, False]]
 acorns_buried = 0
@@ -212,7 +225,8 @@ while run:
     display.fill((0,0,0))
     ui_display.fill((0,0,0,0))
     #print(clock.get_fps())
-    
+    draw_text(str(acorns_buried) + " / 5", font, (255,255,255), 325, 5, ui_display)
+    ui_display.blit(acorn_logo_img, (370, 0))
     #print(player.get_rect().x, player.get_rect().y)
     game_over = True
     #Checking if game is over
@@ -273,7 +287,7 @@ while run:
                     sparks.append(spark.Spark([25 ,15], math.radians(random.randint(0,360)), random.randint(5,7), (random.randint(0,255),random.randint(0,255),random.randint(0,255)), 2, 1))
     
     if not game_over:
-        player.move(tile_rects, time)
+        player.move(tile_rects, time, done_tutorial)
     player.draw(display, scroll)
 
     
@@ -297,6 +311,8 @@ while run:
             #Dig animation
             left_click.draw(time, ui_display, [0,0], (350, 200))
             if click:
+                for x in range(50):
+                    sparks.append(spark.Spark([final_destination[acorn_pos][0][0] - scroll[0], final_destination[acorn_pos][0][1] - scroll[1]], math.radians(random.randint(0,360)), random.randint(2,5), (random.randint(0,255),random.randint(0,255),random.randint(0,255)), 2, 1))
                 final_destination[acorn_pos][2] = True
                 acorns_buried += 1
                 has_acorn = False
@@ -342,6 +358,14 @@ while run:
         if final_destination[acorn_pos][2] != True:
             #display.blit(final_destination[acorn_pos][1], (0,0))
             final_destination[acorn_pos][1].draw(time, ui_display, [0,0], (0,0))
+
+    if not done_tutorial:
+        surface = pygame.Surface((500, 100))
+        pygame.draw.rect(surface, (80,80,80), pygame.rect.Rect(0,0,500,100))
+        surface.set_colorkey((0,0,0))
+        display.blit(surface, (0,180), special_flags=BLEND_RGB_ADD)
+        ui_display.blit(squirrel_head, (0, 180))
+        done_tutorial = tutorial_typer.update(time, ui_display, [350,230])
 
     if game_over:
         if not done_typing:

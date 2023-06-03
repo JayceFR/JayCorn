@@ -41,7 +41,7 @@ class TypeWriter():
         display.blit(img, (x, y))
     
     
-    def update(self, time, display):
+    def update(self, time, display, enter_loc = [350,80]):
         if time - self.last_update > self.cooldown:
             self.current_letter += 1
             if self.current_letter >= len(self.list_of_texts[self.current_frame]):
@@ -66,13 +66,14 @@ class TypeWriter():
         self.draw_text(self.strings, display)
 
         if self.waiting_to_update:
-            self.draw_enter(350, 80, "Enter", display)
+            self.draw_enter(enter_loc[0], enter_loc[1], "Enter", display)
             key = pygame.key.get_pressed()
             if key[pygame.K_RETURN]:
                 self.waiting_to_update = False
                 self.current_frame += 1
                 self.current_letter = -1
                 self.space_count = 0
+                self.current_string_pos = 0
                 self.strings = ["", "", ""]
                 self.check_x = self.start_x
                 if self.current_frame > len(self.list_of_texts) - 1:
