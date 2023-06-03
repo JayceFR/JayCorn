@@ -1,12 +1,13 @@
 import pygame
 class TypeWriter():
-    def __init__(self, font, text_col, x, y, width, font_size) -> None:
+    def __init__(self, font, text_col, x, y, width, font_size, sound) -> None:
         self.font = font
         self.text_col = text_col
         self.x = x
         self.y = y
         self.check_x = x
         self.start_x = x
+        self.sound = sound
         self.end_x = x+width
         self.width = width
         self.font_size = font_size
@@ -47,6 +48,7 @@ class TypeWriter():
             if self.current_letter >= len(self.list_of_texts[self.current_frame]):
                 self.waiting_to_update = True
             if not self.waiting_to_update:
+                self.sound.play()
                 self.check_x += self.font_size
                 self.strings[self.current_string_pos] += self.list_of_texts[self.current_frame][self.current_letter]
                 if self.list_of_texts[self.current_frame][self.current_letter] == " ":

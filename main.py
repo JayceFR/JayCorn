@@ -24,7 +24,7 @@ window = pygame.display.set_mode((s_width, s_height), pygame.OPENGL | pygame.DOU
 screen = pygame.Surface((s_width, s_height))
 display = pygame.Surface((s_width//2, s_height//2))
 ui_display = pygame.Surface((s_width//2, s_height//2), pygame.SRCALPHA)
-pygame.display.set_caption("JayCorn")
+pygame.display.set_caption("Autumn Acorns")
 
 
 def get_image(sheet, frame, width, height, scale, colorkey, scale_coordinates = []):
@@ -113,7 +113,22 @@ squirrel_head = pygame.image.load("./Assets/Entities/squirrel_head.png").convert
 squirrel_head = pygame.transform.scale(squirrel_head, (squirrel_head.get_width()*4, squirrel_head.get_height()*4))
 squirrel_head.set_colorkey((63, 72, 204))
 e_ani_img = pygame.image.load("./Assets/Entities/e_ani.png").convert_alpha()
+end_screen_img = pygame.image.load("./Assets/Entities/end_screen.png").convert_alpha()
 leaf_imgs = [leaf_img, leaf_img2]
+
+#Music
+pygame.mixer.music.load("./Assets/Music/bg_music.wav")
+pygame.mixer.music.set_volume(0.5)
+pygame.mixer.music.play(-1)
+#SFX
+jump_sound = pygame.mixer.Sound("./Assets/Music/jump.wav")
+jump_sound.set_volume(0.5)
+open_map_sound = pygame.mixer.Sound("./Assets/Music/open_map.wav")
+open_map_sound.set_volume(0.5)
+interact_sound = pygame.mixer.Sound("./Assets/Music/interact.wav")
+interact_sound.set_volume(0.2)
+pickup_sound = pygame.mixer.Sound("./Assets/Music/pickup.wav")
+pickup_sound.set_volume(0.2)
 
 squirrel_idle_animation = []
 squrrel_run_animation = []
@@ -194,16 +209,16 @@ noise_img = pygame.image.load("./Assets/Shader/pnoise.png").convert_alpha()
 
 #Typer seetings
 font = pygame.font.Font("./Assets/Fonts/jayce.ttf", 18)
-typer = typewriter.TypeWriter(font, (40,135,140), 40, 10, 400,9)
-tutorial_typer = typewriter.TypeWriter(font, (0,19,127), 80, 180, 400, 9)
-tutorial_typer.write(["Hi There", "I am Jay the squirrel", "As it is Autumn now, The next season is Winter", "Can you please help me...", "Find acorns and bury them into specific locations", "Beware of birds", "They may steal your Acorn", "Hide under trees to save your self"])
+typer = typewriter.TypeWriter(font, (40,135,140), 40, 10, 400,9, interact_sound)
+tutorial_typer = typewriter.TypeWriter(font, (0,19,127), 80, 180, 400, 9, interact_sound)
+tutorial_typer.write(["Hi There...", "I am Mr.J the squirrel", "As it is Autumn now, The next season is Winter", "Can you please help me...", "Find acorns and bury them into specific locations using the maps given", "Beware of birds !", "They may steal your Acorns...", "Hide under trees to save yourself", "Good luck !"])
 done_typing = False
 done_tutorial = False
 
 final_destination = [[(996,360), map_1, False], [(2299,838), map_2, False], [(1335,360), map_3, False] , [(1932,582), map_4, False], [(2599,198), map_5, False]]
 acorns_buried = 0
 
-game_over_highlights = ["The poor squirrel and his family perished in hunger during the cold and freezing winter ", "The squirrel and his family starved throughout the cold winter ", "The squirrel had to fast every week to survive the freezing cold winter", "The squirrel had enough acorns to survive the winter happily, but he didn't have any to provide to his starving family", "The squirrel and his entire family had enough acorns to survive the winter, but they needed to spend every morning with no food ", "The squirrel and his entire family rejoiced over the cold winter by eating acorns and playing games created by JayJan."]
+game_over_highlights = ["The poor squirrel and his family perished in hunger during the cold and freezing winter ", "The squirrel and his family starved throughout the cold winter ", "The squirrel had to fast thrice a week to survive the freezing cold winter", "The squirrel had enough acorns to survive the winter happily, but he didn't have any to provide to his starving family", "The squirrel and his entire family had enough acorns to survive the winter, but they needed to spend every morning with no food", "The squirrel and his entire family rejoiced over the cold winter by eating acorns and playing games created by JayJan."]
 
 #Inventory
 has_acorn = False
@@ -301,6 +316,7 @@ while run:
             if player.get_rect().colliderect(acorn.get_rect()):
                 left_click.draw(time, ui_display, [0,0], (350, 200))
                 if click:
+                    pickup_sound.play()
                     acorn_pos = acorn.get_id()
                     acorns.pop(pos)
                     has_acorn = True
@@ -318,6 +334,7 @@ while run:
             #Dig animation
             left_click.draw(time, ui_display, [0,0], (350, 200))
             if click:
+                pickup_sound.play()
                 for x in range(50):
                     sparks.append(spark.Spark([final_destination[acorn_pos][0][0] - scroll[0], final_destination[acorn_pos][0][1] - scroll[1]], math.radians(random.randint(0,360)), random.randint(2,5), (random.randint(0,255),random.randint(0,255),random.randint(0,255)), 2, 1))
                 final_destination[acorn_pos][2] = True
@@ -341,12 +358,15 @@ while run:
                 if first_time_map:
                     first_time_map = False
                 if show_map:
+                    open_map_sound.play()
                     show_map = False
                     final_destination[acorn_pos][1].reset_frame()
                 else:
                     if has_acorn:
+                        open_map_sound.play()
                         show_map = True
             if (event.key == pygame.K_SPACE or event.key == pygame.K_w) and player.jump_count > 0:
+                jump_sound.play()
                 show_jump_ani = [True, (player.get_rect().x + 15, player.get_rect().y + 23)]
                 show_jump_ani_last_update = time
         
@@ -383,6 +403,8 @@ while run:
             surface.set_colorkey((0,0,0))
             ui_display.blit(surface, (0,0), special_flags=BLEND_RGB_ADD)
             done_typing = typer.update(time, ui_display)
+        else:
+            display.blit(end_screen_img, (0,0))
 
     surf = pygame.transform.scale(display, (s_width, s_height))
     screen.blit(surf, (0,0))
