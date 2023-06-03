@@ -80,6 +80,7 @@ map4_img.set_colorkey((255,255,255))
 map5_img = pygame.image.load("./Assets/Entities/map5.png").convert_alpha()
 map5_img = pygame.transform.scale(map5_img, (map5_img.get_width()*4, map5_img.get_height()*4))
 map5_img.set_colorkey((255,255,255))
+jump_spark_img = pygame.image.load("./Assets/Entities/jump_spark.png").convert_alpha()
 leaf_imgs = [leaf_img, leaf_img2]
 
 squirrel_idle_animation = []
@@ -87,12 +88,15 @@ squrrel_run_animation = []
 bird_animation = []
 acorn_idle_animation = []
 left_click_animation = []
+jump_spark_animation = []
 for x in range(4):
     squirrel_idle_animation.append(get_image(squirrel_idle_spritesheet, x, 25, 24, 1.5, (63, 72, 204)))
     squrrel_run_animation.append(get_image(squirrel_run_spritesheet, x, 30, 18, 1.5, (63, 72, 204), [25*1.5,24*1.5]))
     bird_animation.append(get_image(bird_img, x, 22, 14, 2, (69,40,60)))
     acorn_idle_animation.append(get_image(acorn_idle_spritesheet, x, 11, 12, 1.5, (0,0,0)))
     left_click_animation.append(get_image(left_click_ani_spritesheet, x, 6, 11, 2, (255,255,255)))
+    jump_spark_animation.append(get_image(jump_spark_img, x, 32, 32, 1, (0,0,0)))
+
 
 map = maps.Map("./Assets/Maps/map.txt", 32, "./Assets/Tiles", True, True, {"o": [], "p" : [], "b" : [], "s" : [], "g" : [], "a" : []})
 tile_rects, entity_loc = map.get_rect()
@@ -129,6 +133,10 @@ grass_cooldown = 50
 
 #Chuma stuff
 left_click = chuma.Chuma(left_click_animation)
+jump_spark = chuma.Chuma(jump_spark_animation)
+show_jump_ani = [False, (0,0)]
+show_jump_ani_last_update = 0
+show_jump_ani_cooldown = 600
 click = False
 
 #Inventory
@@ -187,7 +195,7 @@ while run:
     
     #Drawing birds
     for birdie in birdies:
-        birdie.move(time,safe, player.get_rect().x, player.get_rect().y)
+        birdie.move(time,safe, player.get_rect().x, player.get_rect().y, has_acorn)
         birdie.draw(display, scroll)
     
     player.move(tile_rects, time)
@@ -235,8 +243,15 @@ while run:
                     show_map = False
                 else:
                     show_map = True
+            if (event.key == pygame.K_SPACE or event.key == pygame.K_w) and player.jump_count > 0:
+                show_jump_ani = [True, (player.get_rect().x + 15, player.get_rect().y + 23)]
+                show_jump_ani_last_update = time
         
-
+    if show_jump_ani[0] == True:
+        jump_spark.draw(time, display, scroll, show_jump_ani[1])
+        if time - show_jump_ani_last_update > show_jump_ani_cooldown:
+            jump_spark.reset_frame()
+            show_jump_ani[0] = False
     
     bg_particle_effect.recursive_call(time, display, scroll, 1)
     firefly.recursive_call(time, display, scroll)

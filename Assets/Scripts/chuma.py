@@ -15,3 +15,6 @@ class Chuma():
             if self.frame >= 4:
                 self.frame = 0
     
+    def reset_frame(self):
+        self.frame = 0
+    

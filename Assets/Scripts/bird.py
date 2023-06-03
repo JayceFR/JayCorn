@@ -35,7 +35,7 @@ class Bird():
         self.rect.x = self.display_x
         self.rect.y = self.display_y
     
-    def move(self, time, safe, player_x, player_y):
+    def move(self, time, safe, player_x, player_y, has_acorn):
         if time - self.frame_last_update > self.frame_cooldown:
             self.frame += 1
             if self.frame >= 4:
@@ -53,7 +53,7 @@ class Bird():
                 angle = 180 + angle
             else:
                 angle = 360 - angle
-        if player_x >= self.min_x and player_x <= self.max_x and player_y >= self.rect.y:
+        if player_x >= self.min_x and player_x <= self.max_x and player_y >= self.rect.y and has_acorn:
             if not safe:
                 self.rect.y -= math.sin(math.radians(angle)) * self.speed
                 self.rect.x += math.cos(math.radians(angle)) * self.speed
@@ -73,8 +73,10 @@ class Bird():
             self.rect.x += self.direction * self.speed
             if self.rect.x >= self.max_x:
                 self.direction *= -1
+                self.facing_right = False
             elif self.rect.x <= self.min_x:
                 self.direction *= -1
+                self.facing_right = True
     
     def get_range(self):
         return [self.min_x, self.max_x]
