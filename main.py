@@ -112,6 +112,7 @@ house_img.set_colorkey((255,255,255))
 squirrel_head = pygame.image.load("./Assets/Entities/squirrel_head.png").convert_alpha()
 squirrel_head = pygame.transform.scale(squirrel_head, (squirrel_head.get_width()*4, squirrel_head.get_height()*4))
 squirrel_head.set_colorkey((63, 72, 204))
+e_ani_img = pygame.image.load("./Assets/Entities/e_ani.png").convert_alpha()
 leaf_imgs = [leaf_img, leaf_img2]
 
 squirrel_idle_animation = []
@@ -125,6 +126,7 @@ map2_ani = []
 map3_ani = []
 map4_ani = []
 map5_ani = []
+e_ani = []
 for x in range(4):
     squirrel_idle_animation.append(get_image(squirrel_idle_spritesheet, x, 25, 24, 1.5, (63, 72, 204)))
     squrrel_run_animation.append(get_image(squirrel_run_spritesheet, x, 30, 18, 1.5, (63, 72, 204), [25*1.5,24*1.5]))
@@ -137,7 +139,7 @@ for x in range(4):
     map3_ani.append(get_image(map3_ani_spritesheet, x, 96, 59, 4, (255,255,255)))
     map4_ani.append(get_image(map4_ani_spritesheet, x, 96, 59, 4, (255,255,255)))
     map5_ani.append(get_image(map5_ani_spritesheet, x, 96, 59, 4, (255,255,255)))
-
+    e_ani.append(get_image(e_ani_img, x, 32, 32, 1.5, (0,0,0)))
 
 map = maps.Map("./Assets/Maps/map.txt", 32, "./Assets/Tiles", True, True, {"o": [], "p" : [], "b" : [], "s" : [], "g" : [], "a" : [], "f" : [], "h" : []})
 tile_rects, entity_loc = map.get_rect()
@@ -175,6 +177,7 @@ grass_cooldown = 50
 #Chuma stuff
 left_click = chuma.Chuma(left_click_animation)
 jump_spark = chuma.Chuma(jump_spark_animation)
+e = chuma.Chuma(e_ani)
 map_1 = chuma.Chuma(map1_ani, False, 100)
 map_2 = chuma.Chuma(map2_ani, False, 100)
 map_3 = chuma.Chuma(map3_ani, False, 100)
@@ -215,6 +218,8 @@ acorn_pos = -1
 game_over = True
 
 show_map = False
+
+first_time_map = True
 
 initialise_type_writer = True
 
@@ -306,6 +311,8 @@ while run:
     blit_grass(grasses, display, scroll, player)
 
     if has_acorn:
+        if first_time_map:
+            e.draw(time, ui_display, [0,0], [350,200])
         ui_display.blit(acorn_img, (0,0))
         if player.get_rect().collidepoint(final_destination[acorn_pos][0]):
             #Dig animation
@@ -331,6 +338,8 @@ while run:
                     click = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_e:
+                if first_time_map:
+                    first_time_map = False
                 if show_map:
                     show_map = False
                     final_destination[acorn_pos][1].reset_frame()
