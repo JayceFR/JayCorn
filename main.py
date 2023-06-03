@@ -1,4 +1,5 @@
 import pygame
+import math, random
 import Assets.Scripts.map as maps
 import Assets.Scripts.framework as engine
 import Assets.Scripts.bg_particles as bg_particles
@@ -7,6 +8,7 @@ import Assets.Scripts.fireflies as fireflies
 import Assets.Scripts.grass as g
 import Assets.Scripts.acorn as jaycorn
 import Assets.Scripts.chuma as chuma
+import Assets.Scripts.sparks as spark
 
 
 pygame.init()
@@ -160,11 +162,14 @@ show_jump_ani_cooldown = 600
 click = False
 
 final_destination = [[(996,360), map_1, False], [(2299,838), map_2, False], [(1335,360), map_3, False] , [(1932,582), map_4, False], [(2599,198), map_5, False]]
+acorns_buried = 0
 
 #Inventory
 has_acorn = False
 
 safe = False
+
+sparks = []
 
 acorn_pos = -1
 
@@ -219,6 +224,12 @@ while run:
     for birdie in birdies:
         birdie.move(time,safe, player.get_rect().x, player.get_rect().y, has_acorn)
         birdie.draw(display, scroll)
+        if has_acorn:
+            if birdie.get_rect().colliderect(player.get_rect()):
+                final_destination[acorn_pos][2] = True
+                has_acorn = False
+                for x in range(50):
+                    sparks.append(spark.Spark([25 ,15], math.radians(random.randint(0,360)), random.randint(5,7), (random.randint(0,255),random.randint(0,255),random.randint(0,255)), 2, 1))
     
     player.move(tile_rects, time)
     player.draw(display, scroll)
@@ -245,6 +256,7 @@ while run:
             left_click.draw(time, display, [0,0], (350, 200))
             if click:
                 final_destination[acorn_pos][2] = True
+                acorns_buried += 1
                 has_acorn = False
         
 
@@ -279,6 +291,10 @@ while run:
     
     bg_particle_effect.recursive_call(time, display, scroll, 1)
     firefly.recursive_call(time, display, scroll)
+
+    for s in sparks:
+        s.move(1)
+        s.draw(display)
 
     if show_map:
         if final_destination[acorn_pos][2] != True:

@@ -80,3 +80,6 @@ class Bird():
     
     def get_range(self):
         return [self.min_x, self.max_x]
+
+    def get_rect(self):
+        return self.rect
