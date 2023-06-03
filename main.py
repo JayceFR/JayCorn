@@ -96,6 +96,12 @@ map5_ani_spritesheet = pygame.image.load("./Assets/Entities/map5_ani.png").conve
 jump_spark_img = pygame.image.load("./Assets/Entities/jump_spark.png").convert_alpha()
 background_img = pygame.image.load("./Assets/Entities/background.png").convert_alpha()
 background_img = pygame.transform.scale(background_img, (background_img.get_width()*2, background_img.get_height()*3))
+fence_img = pygame.image.load("./Assets/Entities/fence.png").convert_alpha()
+fence_img = pygame.transform.scale(fence_img, (32, 19))
+fence_img.set_colorkey((255,255,255))
+house_img = pygame.image.load("./Assets/Entities/housy.png").convert_alpha()
+house_img = pygame.transform.scale(house_img, (house_img.get_width()*2, house_img.get_height()*2))
+house_img.set_colorkey((255,255,255))
 leaf_imgs = [leaf_img, leaf_img2]
 
 squirrel_idle_animation = []
@@ -123,7 +129,7 @@ for x in range(4):
     map5_ani.append(get_image(map5_ani_spritesheet, x, 96, 59, 4, (255,255,255)))
 
 
-map = maps.Map("./Assets/Maps/map.txt", 32, "./Assets/Tiles", True, True, {"o": [], "p" : [], "b" : [], "s" : [], "g" : [], "a" : []})
+map = maps.Map("./Assets/Maps/map.txt", 32, "./Assets/Tiles", True, True, {"o": [], "p" : [], "b" : [], "s" : [], "g" : [], "a" : [], "f" : [], "h" : []})
 tile_rects, entity_loc = map.get_rect()
 player = engine.Player(entity_loc['s'][0][0],entity_loc['s'][0][1], squirrel_idle_animation[0].get_width(), squirrel_idle_animation[1].get_height(), squirrel_idle_animation, squrrel_run_animation, squirrel_jump, squirrel_fall)
 true_scroll = [0,0]
@@ -235,6 +241,9 @@ while run:
         grass_last_update = time
 
     map.draw(display, scroll)
+    for loc in entity_loc['f']:
+        display.blit(fence_img, (loc[0] - scroll[0], loc[1] + 12 - scroll[1]))
+    
 
     safe = False
     #Drawing trees and checking if player is safe
@@ -248,6 +257,9 @@ while run:
             if player.get_rect().collidepoint(loc[0], loc[1]):
                 safe = True
             display.blit(tree_img, (loc[0] - scroll[0] - 69, loc[1] - scroll[1] - 110))
+    
+    for loc in entity_loc['h']:
+        display.blit(house_img, (loc[0]  - scroll[0], loc[1] - 50 - scroll[1]))
     
     #Drawing birds
     for birdie in birdies:
