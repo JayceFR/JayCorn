@@ -94,6 +94,8 @@ map3_ani_spritesheet = pygame.image.load("./Assets/Entities/map3_ani.png").conve
 map4_ani_spritesheet = pygame.image.load("./Assets/Entities/map4_ani.png").convert_alpha()
 map5_ani_spritesheet = pygame.image.load("./Assets/Entities/map5_ani.png").convert_alpha()
 jump_spark_img = pygame.image.load("./Assets/Entities/jump_spark.png").convert_alpha()
+background_img = pygame.image.load("./Assets/Entities/background.png").convert_alpha()
+background_img = pygame.transform.scale(background_img, (background_img.get_width()*2, background_img.get_height()*3))
 leaf_imgs = [leaf_img, leaf_img2]
 
 squirrel_idle_animation = []
@@ -187,6 +189,7 @@ has_acorn = False
 safe = False
 
 sparks = []
+scroll = [0,0]
 
 acorn_pos = -1
 
@@ -203,7 +206,7 @@ while run:
     display.fill((0,0,0))
     ui_display.fill((0,0,0,0))
     #print(clock.get_fps())
-
+    
     #print(player.get_rect().x, player.get_rect().y)
     game_over = True
     #Checking if game is over
@@ -217,11 +220,13 @@ while run:
             print("Game over")
     #print(game_over)
 
-    true_scroll[0] += (player.get_rect().x - true_scroll[0] - 202) / 5
-    true_scroll[1] += (player.get_rect().y - true_scroll[1] - 132) / 5
+    true_scroll[0] += (player.get_rect().x - true_scroll[0] - 202) 
+    true_scroll[1] += (player.get_rect().y - true_scroll[1] - 132) 
     scroll = true_scroll.copy()
     scroll[0] = int(scroll[0])
     scroll[1] = int(scroll[1])
+
+    display.blit(background_img, (-50-scroll[0], -50-scroll[1]))
 
     #Grass movement
     if time - grass_last_update > grass_cooldown:
