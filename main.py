@@ -9,6 +9,7 @@ import Assets.Scripts.grass as g
 import Assets.Scripts.acorn as jaycorn
 import Assets.Scripts.chuma as chuma
 import Assets.Scripts.sparks as spark
+import Assets.Scripts.typewriter as typewriter
 
 
 pygame.init()
@@ -161,8 +162,15 @@ show_jump_ani_last_update = 0
 show_jump_ani_cooldown = 600
 click = False
 
+#Typer seetings
+font = pygame.font.Font("./Assets/Fonts/jayce.ttf", 15)
+typer = typewriter.TypeWriter(font, (40,135,140), 40, 10, 400,9)
+done_typing = False
+
 final_destination = [[(996,360), map_1, False], [(2299,838), map_2, False], [(1335,360), map_3, False] , [(1932,582), map_4, False], [(2599,198), map_5, False]]
 acorns_buried = 0
+
+game_over_highlights = ["The poor squirrel and his family perished in hunger during the cold and freezing winter ", "The squirrel and his family starved throughout the cold winter ", "The squirrel had to fast every week to survive the freezing cold winter", "The squirrel had enough acorns to survive the winter happily, but he didn't have any to provide to his starving family", "The squirrel and his entire family had enough acorns to survive the winter, but they needed to spend every morning with no food ", "The squirrel and his entire family rejoiced over the cold winter by eating acorns and playing games created by JayJan."]
 
 #Inventory
 has_acorn = False
@@ -177,6 +185,8 @@ game_over = True
 
 show_map = False
 
+initialise_type_writer = True
+
 while run:
     clock.tick(60)
     time = pygame.time.get_ticks()
@@ -190,7 +200,10 @@ while run:
         if destination[2] == False:
             game_over = False
     if game_over:
-        print("Game over")
+        if initialise_type_writer:
+            typer.write([game_over_highlights[acorns_buried]])
+            initialise_type_writer = False
+            print("Game over")
     #print(game_over)
 
     true_scroll[0] += (player.get_rect().x - true_scroll[0] - 202) / 5
@@ -231,7 +244,8 @@ while run:
                 for x in range(50):
                     sparks.append(spark.Spark([25 ,15], math.radians(random.randint(0,360)), random.randint(5,7), (random.randint(0,255),random.randint(0,255),random.randint(0,255)), 2, 1))
     
-    player.move(tile_rects, time)
+    if not game_over:
+        player.move(tile_rects, time)
     player.draw(display, scroll)
 
     
@@ -300,6 +314,14 @@ while run:
         if final_destination[acorn_pos][2] != True:
             #display.blit(final_destination[acorn_pos][1], (0,0))
             final_destination[acorn_pos][1].draw(time, display, [0,0], (0,0))
+
+    if game_over:
+        if not done_typing:
+            surface = pygame.Surface((500, 100))
+            pygame.draw.rect(surface, (80,80,80), pygame.rect.Rect(0,0,500,100))
+            surface.set_colorkey((0,0,0))
+            display.blit(surface, (0,0), special_flags=BLEND_RGB_ADD)
+            done_typing = typer.update(time, display)
 
     surf = pygame.transform.scale(display, (s_width, s_height))
     screen.blit(surf, (0,0))
