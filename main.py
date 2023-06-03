@@ -80,6 +80,11 @@ map4_img.set_colorkey((255,255,255))
 map5_img = pygame.image.load("./Assets/Entities/map5.png").convert_alpha()
 map5_img = pygame.transform.scale(map5_img, (map5_img.get_width()*4, map5_img.get_height()*4))
 map5_img.set_colorkey((255,255,255))
+map1_ani_spritesheet = pygame.image.load("./Assets/Entities/map1_ani.png").convert_alpha()
+map2_ani_spritesheet = pygame.image.load("./Assets/Entities/map2_ani.png").convert_alpha()
+map3_ani_spritesheet = pygame.image.load("./Assets/Entities/map3_ani.png").convert_alpha()
+map4_ani_spritesheet = pygame.image.load("./Assets/Entities/map4_ani.png").convert_alpha()
+map5_ani_spritesheet = pygame.image.load("./Assets/Entities/map5_ani.png").convert_alpha()
 jump_spark_img = pygame.image.load("./Assets/Entities/jump_spark.png").convert_alpha()
 leaf_imgs = [leaf_img, leaf_img2]
 
@@ -89,6 +94,11 @@ bird_animation = []
 acorn_idle_animation = []
 left_click_animation = []
 jump_spark_animation = []
+map1_ani = []
+map2_ani = []
+map3_ani = []
+map4_ani = []
+map5_ani = []
 for x in range(4):
     squirrel_idle_animation.append(get_image(squirrel_idle_spritesheet, x, 25, 24, 1.5, (63, 72, 204)))
     squrrel_run_animation.append(get_image(squirrel_run_spritesheet, x, 30, 18, 1.5, (63, 72, 204), [25*1.5,24*1.5]))
@@ -96,6 +106,11 @@ for x in range(4):
     acorn_idle_animation.append(get_image(acorn_idle_spritesheet, x, 11, 12, 1.5, (0,0,0)))
     left_click_animation.append(get_image(left_click_ani_spritesheet, x, 6, 11, 2, (255,255,255)))
     jump_spark_animation.append(get_image(jump_spark_img, x, 32, 32, 1, (0,0,0)))
+    map1_ani.append(get_image(map1_ani_spritesheet, x, 96, 59, 4, (255,255,255)))
+    map2_ani.append(get_image(map2_ani_spritesheet, x, 96, 59, 4, (255,255,255)))
+    map3_ani.append(get_image(map3_ani_spritesheet, x, 96, 59, 4, (255,255,255)))
+    map4_ani.append(get_image(map4_ani_spritesheet, x, 96, 59, 4, (255,255,255)))
+    map5_ani.append(get_image(map5_ani_spritesheet, x, 96, 59, 4, (255,255,255)))
 
 
 map = maps.Map("./Assets/Maps/map.txt", 32, "./Assets/Tiles", True, True, {"o": [], "p" : [], "b" : [], "s" : [], "g" : [], "a" : []})
@@ -110,7 +125,7 @@ if len(entity_loc['b']) != 0:
         birdies.append(bird.Bird(loc[0], loc[1], 32, 32, bird_animation))
 
 acorns = []
-final_destination = [[(996,360), map1_img, False], [(2299,838), map2_img, False], [(1335,360), map3_img, False] , [(1932,582), map4_img, False], [(2599,198), map5_img, False]]
+#final_destination = [[(996,360), map1_img, False], [(2299,838), map2_img, False], [(1335,360), map3_img, False] , [(1932,582), map4_img, False], [(2599,198), map5_img, False]]
 if len(entity_loc['a']) != 0:
     for pos, loc in enumerate(entity_loc['a']):
         acorns.append(jaycorn.Acorn(loc[0], loc[1], acorn_idle_animation[0].get_width(), acorn_idle_animation[0].get_height(), acorn_idle_animation, pos))
@@ -134,10 +149,17 @@ grass_cooldown = 50
 #Chuma stuff
 left_click = chuma.Chuma(left_click_animation)
 jump_spark = chuma.Chuma(jump_spark_animation)
+map_1 = chuma.Chuma(map1_ani, False, 100)
+map_2 = chuma.Chuma(map2_ani, False, 100)
+map_3 = chuma.Chuma(map3_ani, False, 100)
+map_4 = chuma.Chuma(map4_ani, False, 100)
+map_5 = chuma.Chuma(map5_ani, False, 100)
 show_jump_ani = [False, (0,0)]
 show_jump_ani_last_update = 0
 show_jump_ani_cooldown = 600
 click = False
+
+final_destination = [[(996,360), map_1, False], [(2299,838), map_2, False], [(1335,360), map_3, False] , [(1932,582), map_4, False], [(2599,198), map_5, False]]
 
 #Inventory
 has_acorn = False
@@ -241,8 +263,10 @@ while run:
             if event.key == pygame.K_e:
                 if show_map:
                     show_map = False
+                    final_destination[acorn_pos][1].reset_frame()
                 else:
-                    show_map = True
+                    if has_acorn:
+                        show_map = True
             if (event.key == pygame.K_SPACE or event.key == pygame.K_w) and player.jump_count > 0:
                 show_jump_ani = [True, (player.get_rect().x + 15, player.get_rect().y + 23)]
                 show_jump_ani_last_update = time
@@ -258,7 +282,8 @@ while run:
 
     if show_map:
         if final_destination[acorn_pos][2] != True:
-            display.blit(final_destination[acorn_pos][1], (0,0))
+            #display.blit(final_destination[acorn_pos][1], (0,0))
+            final_destination[acorn_pos][1].draw(time, display, [0,0], (0,0))
 
     surf = pygame.transform.scale(display, (s_width, s_height))
     screen.blit(surf, (0,0))
